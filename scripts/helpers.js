@@ -29,7 +29,7 @@ export function getCardNode() {
     /**
      * Get answer card image node
      */
-    return document.querySelector('img');
+    return document.querySelector('.answer img');
 }
 
 export function getCheckbox() {
@@ -50,7 +50,7 @@ export function getNumberInput() {
     /**
      * Get number input node
      */
-    return document.querySelector('input[type="number"');
+    return document.querySelector('input[type="number"]');
 }
 
 export function getOutput() {
@@ -76,7 +76,7 @@ export function getTiles() {
 
 export function getTries() {
     /**
-     * Get the current value of number of guesses
+     * Get the current value of tries
      */
     return getNumberInput().value;
 }
@@ -112,33 +112,37 @@ export function setCard() {
         'king of diamonds',
         'queen of spades'
     ];
-
     const idx = Math.floor(Math.random() * 9);
     const card = cards[idx];
-    const cardNode = getCardNode();
     const path = card.split(' ').join('_');
+    const cardNode = getCardNode();
     cardNode.src = `images/${path}.svg`;
     cardNode.alt = card;
 
     // hide the card
     cardNode.classList.toggle('hidden', true);
-    // cancel the animation
-    cardNode.classList.toggle('fade', false)
-    cardNode.parentNode.classList.toggle('flip', false)
+
+    const CardNode = getCardNode();
+    const parentElement = CardNode.parentElement;
+
+    CardNode.classList.remove('fade');
+    parentElement.classList.remove('flip');
+
 }
 
 export function showCard() {
     /**
      * Show the answer card and disable the 'show' button
      */
-    const cardNode = getCardNode();
-    cardNode.classList.toggle('hidden', false);
+    getCardNode().classList.toggle('hidden', false);
     getShowBtn().toggleAttribute('disabled', true);
 
+    const CardNode = getCardNode();
+    const parentElement = CardNode.parentElement;
 
-    // animate the card
-    cardNode.classList.toggle('fade', true)
-    cardNode.parentNode.classList.toggle('flip', true)
+    CardNode.classList.add('fade');
+    parentElement.classList.add('flip');
+
 
 }
 
@@ -149,7 +153,5 @@ export function toggleInputState(e) {
      * The information is available in the event object passed to the
      * function at call time.
      */
-    const numberInput = getNumberInput();
-    numberInput.toggleAttribute('disabled', !e.target.checked);
-
+    getNumberInput().toggleAttribute('disabled', !e.target.checked);
 }
