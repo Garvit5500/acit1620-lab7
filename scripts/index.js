@@ -10,7 +10,6 @@
  * displayed, allowing the player to reveal the answer.
  */
 import {
-
     getCard,
     getCheckbox,
     getContinueBtn,
@@ -52,32 +51,36 @@ function setup() {
      * assigned to the 'tries' variable and the game is restarted.
      * 
      */
+
     getShowBtn().addEventListener('click', showCard);
     getRestartBtn().addEventListener('click', play);
     getContinueBtn().addEventListener('click', activate);
-    getCheckbox().addEventListener('change', toggleInputState)
-    getNumberInput().addEventListener('input', (e) => {
-        // 1. check user input, and if not provided, do nothing
-        // 2. restart the game
-        if (e.target.value != '') {
-            play();
+    getCheckbox().addEventListener('change', toggleInputState);
+    getNumberInput().addEventListener('input', (event) => {
+        const inputValue = event.target.value.trim();
+        if (inputValue === '') {
+            return;
         }
-    })
+        restartGame();
+    });
+
+
     for (let tile of getTiles()) {
         tile.addEventListener('click', (e) => {
             const outputNodes = getOutput().querySelectorAll('span');
 
-            outputNodes[0].innerHTML = `You clicked the <b>${tile.alt}</b>`;
+            outputNodes.item(0).innerHTML = `You selected the <b>${e.target.alt}</b>`;
 
-            if (tile.alt === getCard().alt) {
-                outputNodes[1].textContent = 'You win';
+            if (tile.alt === getCard()) {
+                outputNodes.item(1).textContent = 'You win!';
                 showResults();
-            } else if (tries > 1) {
-                outputNodes[1].textContent = 'Wrong...'
-                pause();
             } else {
-                outputNodes[1].textContent = 'You lose';
-                showResults();
+                outputNodes.item(1).textContent = 'Not quite!';
+                if (tries > 1) {
+                    pause();
+                } else {
+                    showResults();
+                }
             }
         })
     }
@@ -90,13 +93,11 @@ function deactivate() {
      * - Disable click events on the card tiles and dim
      * the selection panel
      */
-
     for (let tile of getTiles()) {
-        tile.toggleAttribute('disabled', true)
-        tile.style.pointer = 'normal';
+        tile.toggleAttribute('disabled', true);
     }
+
     getPanel().classList.toggle('dim', true);
-    console.log('lets go!')
 }
 
 function activate() {
@@ -110,13 +111,12 @@ function activate() {
      * disabled in the previous round)to active state 
      */
     for (let tile of getTiles()) {
-        tile.toggleAttribute('disabled', false)
-        tile.style.pointer = 'pointer';
+        tile.toggleAttribute('disabled', false);
     }
     getPanel().classList.toggle('dim', false);
-    getCheckbox().checked = false;
-    getNumberInput().toggleAttribute('disabled', true);
-    getContinueBtn().classList.toggle('hidden', true)
+
+    getCheckbox().toggleAttribute('checked', false);
+    getContinueBtn().classList.toggle('hidden', true);
     getShowBtn().toggleAttribute('disabled', false);
 }
 
@@ -131,33 +131,35 @@ function play() {
      * - Hide the 'show' and 'restart' buttons
      * - Clear the previous round's output
      */
-
     setCard();
-    const tiles = getTiles();
-    const randTiles = shuffle(Array.from(tiles));
-    for (let i = 0; i < randTiles.length; i++) {
-        randTiles[i].parentElement.style.order = `${i}`;
+
+    const tiles = getTiles(); // -> NodeList
+    const randomizedTiles = shuffle(Array.from(tiles)) // first turn NodeList into Array
+    for (let i = 0; i < randomizedTiles.length; i++) {
+        randomizedTiles[i].parentElement.style.order = `${i}`;
     }
+
     tries = getTries();
 
     activate();
+
     getShowBtn().classList.toggle('hidden', true);
     getRestartBtn().classList.toggle('hidden', true);
 
-    getOutput().querySelectorAll('span:not(:last-child').forEach(el => el.textContent = '');
+    getOutput().querySelectorAll('span:not(:last-child)').forEach(el => el.textContent = '');
 }
 
 
 function pause() {
     /**
      * Called only if the player has more guesses to try. (tries > 1)
-     * - De-activate the selection panel
+     * - De-activate the selection panel and dim it
      * - Show the number of tries left
      * - Show the continue button
      */
     deactivate();
     getOutput().querySelector('span:last-child').textContent = `You have ${--tries} left`;
-    getContinueBtn().classList.toggle('hidden', false)
+    getContinueBtn().classList.toggle('hidden', false);
 }
 
 
